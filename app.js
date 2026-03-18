@@ -317,4 +317,31 @@ function init() {
   }, WEATHER_TTL);
 }
 
-document.addEventListener('DOMContentLoaded', init);
+// ── Theme toggle ──────────────────────────────────────────────────────────────
+
+const THEME_KEY = 'world-clock-theme';
+
+function initTheme() {
+  const btn = document.getElementById('theme-toggle');
+  const saved = localStorage.getItem(THEME_KEY);
+  if (saved === 'steampunk') applyTheme('steampunk');
+
+  btn.addEventListener('click', () => {
+    const next = document.body.classList.contains('steampunk') ? 'default' : 'steampunk';
+    applyTheme(next);
+    localStorage.setItem(THEME_KEY, next);
+  });
+}
+
+function applyTheme(theme) {
+  const btn = document.getElementById('theme-toggle');
+  if (theme === 'steampunk') {
+    document.body.classList.add('steampunk');
+    btn.textContent = '🔵 Default';
+  } else {
+    document.body.classList.remove('steampunk');
+    btn.textContent = '⚙️ Steampunk';
+  }
+}
+
+document.addEventListener('DOMContentLoaded', () => { init(); initTheme(); });

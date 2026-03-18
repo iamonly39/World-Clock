@@ -1,0 +1,179 @@
+/* ================== STEAMPUNK THEME OVERRIDES ================== */
+/* Applied when <body> has class "steampunk" */
+
+body.steampunk {
+  font-family: 'Courier New', monospace;
+  background: linear-gradient(135deg, #1a1a1a 0%, #2a2a2a 50%, #1a1a1a 100%);
+  color: #E5D4A8;
+}
+
+body.steampunk::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 20% 50%, rgba(212, 175, 55, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 80%, rgba(184, 115, 51, 0.03) 0%, transparent 50%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+body.steampunk header {
+  background: linear-gradient(135deg, rgba(42,42,42,0.9) 0%, rgba(52,52,52,0.9) 100%);
+  border: 3px solid #D4AF37;
+  border-radius: 10px;
+  box-shadow: 0 0 30px rgba(212,175,55,0.4), inset 0 0 20px rgba(0,0,0,0.5);
+  padding: 2rem;
+  margin-bottom: 2rem;
+}
+
+body.steampunk header h1 {
+  background: none;
+  -webkit-background-clip: unset;
+  -webkit-text-fill-color: unset;
+  background-clip: unset;
+  color: #D4AF37;
+  text-shadow: 0 0 10px rgba(212,175,55,0.8);
+  letter-spacing: 3px;
+}
+
+body.steampunk .subtitle {
+  color: #E5D4A8;
+  letter-spacing: 2px;
+  text-transform: uppercase;
+}
+
+/* Theme toggle button steampunk style */
+body.steampunk #theme-toggle {
+  background: linear-gradient(135deg, #D4AF37 0%, #AA8C2C 100%);
+  color: #1a1a1a;
+  border: 2px solid #AA8C2C;
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  box-shadow: 0 0 10px rgba(212,175,55,0.4);
+}
+
+body.steampunk #theme-toggle:hover {
+  box-shadow: 0 0 18px rgba(212,175,55,0.7);
+}
+
+/* Add clock bar */
+body.steampunk .add-clock select {
+  background: #2a2a2a;
+  color: #E5D4A8;
+  border: 2px solid #AA8C2C;
+  font-family: 'Courier New', monospace;
+}
+
+body.steampunk .add-clock select:focus {
+  border-color: #D4AF37;
+}
+
+body.steampunk .add-clock button {
+  background: linear-gradient(135deg, #D4AF37 0%, #AA8C2C 100%);
+  color: #1a1a1a;
+  border: 2px solid #AA8C2C;
+  font-family: 'Courier New', monospace;
+  font-weight: bold;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+body.steampunk .add-clock button:hover {
+  box-shadow: 0 0 14px rgba(212,175,55,0.5);
+  background: linear-gradient(135deg, #E5D4A8 0%, #D4AF37 100%);
+}
+
+/* Clock cards */
+body.steampunk .clock-card {
+  background: linear-gradient(135deg, rgba(212,175,55,0.08) 0%, rgba(184,115,51,0.08) 100%);
+  border: 2px solid #D4AF37;
+  border-radius: 8px;
+  box-shadow: 0 8px 16px rgba(0,0,0,0.6), 0 0 20px rgba(212,175,55,0.15), inset 0 1px 0 rgba(255,255,255,0.07);
+  position: relative;
+  overflow: hidden;
+}
+
+body.steampunk .clock-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: repeating-linear-gradient(
+    45deg,
+    transparent,
+    transparent 2px,
+    rgba(212,175,55,0.04) 2px,
+    rgba(212,175,55,0.04) 4px
+  );
+  pointer-events: none;
+}
+
+body.steampunk .clock-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.8), 0 0 28px rgba(212,175,55,0.3);
+}
+
+body.steampunk .clock-card .city-name {
+  color: #D4AF37;
+  text-shadow: 0 0 8px rgba(212,175,55,0.4);
+  letter-spacing: 1px;
+  text-transform: uppercase;
+}
+
+body.steampunk .clock-card .tz-label {
+  color: #E5D4A8;
+  letter-spacing: 1px;
+}
+
+body.steampunk .clock-card .time-display {
+  color: #D4AF37;
+  text-shadow: 0 0 8px rgba(212,175,55,0.5), 0 0 20px rgba(212,175,55,0.2);
+  font-family: 'Courier New', monospace;
+}
+
+body.steampunk .clock-card .time-display .seconds {
+  color: #B87333;
+}
+
+body.steampunk .clock-card .ampm {
+  color: #AA8C2C;
+}
+
+body.steampunk .clock-card .date-display {
+  color: #E5D4A8;
+  letter-spacing: 1px;
+}
+
+body.steampunk .clock-card .weather-display {
+  border-top: 1px solid #AA8C2C;
+  background: rgba(0,0,0,0.2);
+}
+
+body.steampunk .clock-card .weather-temp {
+  color: #D4AF37;
+  font-weight: bold;
+}
+
+body.steampunk .clock-card .weather-label {
+  color: #E5D4A8;
+}
+
+body.steampunk .clock-card .remove-btn {
+  color: #AA8C2C;
+}
+
+body.steampunk .clock-card .remove-btn:hover {
+  color: #8B0000;
+  background: rgba(139,0,0,0.15);
+}
+
+body.steampunk .empty-state {
+  color: #AA8C2C;
+}
