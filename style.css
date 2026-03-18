@@ -172,6 +172,38 @@ main {
   margin-top: 0.3rem;
 }
 
+.clock-card .weather-display {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.85rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.85rem;
+  min-height: 1.6rem;
+}
+
+.clock-card .weather-emoji {
+  font-size: 1.2rem;
+  line-height: 1;
+}
+
+.clock-card .weather-temp {
+  font-weight: 600;
+  color: var(--text);
+}
+
+.clock-card .weather-label {
+  color: var(--text-muted);
+}
+
+.clock-card .weather-loading,
+.clock-card .weather-unavailable {
+  color: var(--text-muted);
+  font-size: 0.78rem;
+  font-style: italic;
+}
+
 .clock-card .ampm {
   font-size: 1rem;
   color: var(--accent);

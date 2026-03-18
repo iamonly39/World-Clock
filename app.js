@@ -1,56 +1,134 @@
 const MAJOR_CITIES = [
-  { city: 'New York',      timezone: 'America/New_York' },
-  { city: 'Los Angeles',   timezone: 'America/Los_Angeles' },
-  { city: 'Chicago',       timezone: 'America/Chicago' },
-  { city: 'São Paulo',     timezone: 'America/Sao_Paulo' },
-  { city: 'London',        timezone: 'Europe/London' },
-  { city: 'Paris',         timezone: 'Europe/Paris' },
-  { city: 'Berlin',        timezone: 'Europe/Berlin' },
-  { city: 'Moscow',        timezone: 'Europe/Moscow' },
-  { city: 'Dubai',         timezone: 'Asia/Dubai' },
-  { city: 'Mumbai',        timezone: 'Asia/Kolkata' },
-  { city: 'Bangkok',       timezone: 'Asia/Bangkok' },
-  { city: 'Singapore',     timezone: 'Asia/Singapore' },
-  { city: 'Shanghai',      timezone: 'Asia/Shanghai' },
-  { city: 'Tokyo',         timezone: 'Asia/Tokyo' },
-  { city: 'Seoul',         timezone: 'Asia/Seoul' },
-  { city: 'Sydney',        timezone: 'Australia/Sydney' },
-  { city: 'Auckland',      timezone: 'Pacific/Auckland' },
-  { city: 'Honolulu',      timezone: 'Pacific/Honolulu' },
-  { city: 'Anchorage',     timezone: 'America/Anchorage' },
-  { city: 'Mexico City',   timezone: 'America/Mexico_City' },
-  { city: 'Toronto',       timezone: 'America/Toronto' },
-  { city: 'Vancouver',     timezone: 'America/Vancouver' },
-  { city: 'Buenos Aires',  timezone: 'America/Argentina/Buenos_Aires' },
-  { city: 'Cairo',         timezone: 'Africa/Cairo' },
-  { city: 'Nairobi',       timezone: 'Africa/Nairobi' },
-  { city: 'Lagos',         timezone: 'Africa/Lagos' },
-  { city: 'Johannesburg',  timezone: 'Africa/Johannesburg' },
-  { city: 'Istanbul',      timezone: 'Europe/Istanbul' },
-  { city: 'Riyadh',        timezone: 'Asia/Riyadh' },
-  { city: 'Karachi',       timezone: 'Asia/Karachi' },
-  { city: 'Dhaka',         timezone: 'Asia/Dhaka' },
-  { city: 'Jakarta',       timezone: 'Asia/Jakarta' },
-  { city: 'Taipei',        timezone: 'Asia/Taipei' },
-  { city: 'Kolkata',       timezone: 'Asia/Kolkata' },
-  { city: 'Ho Chi Minh',   timezone: 'Asia/Ho_Chi_Minh' },
-  { city: 'Kuala Lumpur',  timezone: 'Asia/Kuala_Lumpur' },
-  { city: 'Perth',         timezone: 'Australia/Perth' },
-  { city: 'UTC',           timezone: 'UTC' },
+  { city: 'New York',      timezone: 'America/New_York',               lat: 40.71,  lon: -74.01  },
+  { city: 'Los Angeles',   timezone: 'America/Los_Angeles',            lat: 34.05,  lon: -118.24 },
+  { city: 'Chicago',       timezone: 'America/Chicago',                lat: 41.85,  lon: -87.65  },
+  { city: 'São Paulo',     timezone: 'America/Sao_Paulo',              lat: -23.55, lon: -46.63  },
+  { city: 'London',        timezone: 'Europe/London',                  lat: 51.51,  lon: -0.13   },
+  { city: 'Paris',         timezone: 'Europe/Paris',                   lat: 48.85,  lon: 2.35    },
+  { city: 'Berlin',        timezone: 'Europe/Berlin',                  lat: 52.52,  lon: 13.41   },
+  { city: 'Moscow',        timezone: 'Europe/Moscow',                  lat: 55.75,  lon: 37.62   },
+  { city: 'Dubai',         timezone: 'Asia/Dubai',                     lat: 25.20,  lon: 55.27   },
+  { city: 'Mumbai',        timezone: 'Asia/Kolkata',                   lat: 19.08,  lon: 72.88   },
+  { city: 'Bangkok',       timezone: 'Asia/Bangkok',                   lat: 13.75,  lon: 100.52  },
+  { city: 'Singapore',     timezone: 'Asia/Singapore',                 lat: 1.35,   lon: 103.82  },
+  { city: 'Shanghai',      timezone: 'Asia/Shanghai',                  lat: 31.22,  lon: 121.46  },
+  { city: 'Tokyo',         timezone: 'Asia/Tokyo',                     lat: 35.69,  lon: 139.69  },
+  { city: 'Seoul',         timezone: 'Asia/Seoul',                     lat: 37.57,  lon: 126.98  },
+  { city: 'Sydney',        timezone: 'Australia/Sydney',               lat: -33.87, lon: 151.21  },
+  { city: 'Auckland',      timezone: 'Pacific/Auckland',               lat: -36.87, lon: 174.77  },
+  { city: 'Honolulu',      timezone: 'Pacific/Honolulu',               lat: 21.31,  lon: -157.86 },
+  { city: 'Anchorage',     timezone: 'America/Anchorage',              lat: 61.22,  lon: -149.90 },
+  { city: 'Mexico City',   timezone: 'America/Mexico_City',            lat: 19.43,  lon: -99.13  },
+  { city: 'Toronto',       timezone: 'America/Toronto',                lat: 43.65,  lon: -79.38  },
+  { city: 'Vancouver',     timezone: 'America/Vancouver',              lat: 49.25,  lon: -123.12 },
+  { city: 'Buenos Aires',  timezone: 'America/Argentina/Buenos_Aires', lat: -34.61, lon: -58.38  },
+  { city: 'Cairo',         timezone: 'Africa/Cairo',                   lat: 30.06,  lon: 31.25   },
+  { city: 'Nairobi',       timezone: 'Africa/Nairobi',                 lat: -1.29,  lon: 36.82   },
+  { city: 'Lagos',         timezone: 'Africa/Lagos',                   lat: 6.45,   lon: 3.40    },
+  { city: 'Johannesburg',  timezone: 'Africa/Johannesburg',            lat: -26.20, lon: 28.04   },
+  { city: 'Istanbul',      timezone: 'Europe/Istanbul',                lat: 41.01,  lon: 28.95   },
+  { city: 'Riyadh',        timezone: 'Asia/Riyadh',                    lat: 24.69,  lon: 46.72   },
+  { city: 'Karachi',       timezone: 'Asia/Karachi',                   lat: 24.86,  lon: 67.01   },
+  { city: 'Dhaka',         timezone: 'Asia/Dhaka',                     lat: 23.72,  lon: 90.41   },
+  { city: 'Jakarta',       timezone: 'Asia/Jakarta',                   lat: -6.21,  lon: 106.85  },
+  { city: 'Taipei',        timezone: 'Asia/Taipei',                    lat: 25.05,  lon: 121.53  },
+  { city: 'Kolkata',       timezone: 'Asia/Kolkata',                   lat: 22.57,  lon: 88.36   },
+  { city: 'Ho Chi Minh',   timezone: 'Asia/Ho_Chi_Minh',               lat: 10.82,  lon: 106.63  },
+  { city: 'Kuala Lumpur',  timezone: 'Asia/Kuala_Lumpur',              lat: 3.15,   lon: 101.69  },
+  { city: 'Perth',         timezone: 'Australia/Perth',                lat: -31.95, lon: 115.86  },
+  { city: 'UTC',           timezone: 'UTC',                            lat: 51.48,  lon: 0.00    },
 ];
+
+// WMO weather interpretation codes → emoji + label
+const WMO_CODES = {
+  0:  { emoji: '☀️',  label: 'Clear' },
+  1:  { emoji: '🌤️', label: 'Mostly Clear' },
+  2:  { emoji: '⛅',  label: 'Partly Cloudy' },
+  3:  { emoji: '☁️',  label: 'Overcast' },
+  45: { emoji: '🌫️', label: 'Foggy' },
+  48: { emoji: '🌫️', label: 'Icy Fog' },
+  51: { emoji: '🌦️', label: 'Light Drizzle' },
+  53: { emoji: '🌦️', label: 'Drizzle' },
+  55: { emoji: '🌧️', label: 'Heavy Drizzle' },
+  61: { emoji: '🌧️', label: 'Light Rain' },
+  63: { emoji: '🌧️', label: 'Rain' },
+  65: { emoji: '🌧️', label: 'Heavy Rain' },
+  71: { emoji: '🌨️', label: 'Light Snow' },
+  73: { emoji: '❄️',  label: 'Snow' },
+  75: { emoji: '❄️',  label: 'Heavy Snow' },
+  77: { emoji: '🌨️', label: 'Snow Grains' },
+  80: { emoji: '🌦️', label: 'Showers' },
+  81: { emoji: '🌧️', label: 'Showers' },
+  82: { emoji: '⛈️',  label: 'Heavy Showers' },
+  85: { emoji: '🌨️', label: 'Snow Showers' },
+  86: { emoji: '❄️',  label: 'Heavy Snow Showers' },
+  95: { emoji: '⛈️',  label: 'Thunderstorm' },
+  96: { emoji: '⛈️',  label: 'Thunderstorm' },
+  99: { emoji: '⛈️',  label: 'Thunderstorm' },
+};
 
 const DEFAULT_CITIES = [
   'New York', 'London', 'Tokyo', 'Sydney', 'Dubai', 'Paris',
 ];
 
 const STORAGE_KEY = 'world-clock-timezones';
+const WEATHER_TTL = 15 * 60 * 1000; // 15 minutes
 
 let activeTimezones = [];
+const weatherCache = new Map(); // timezone → { data, fetchedAt }
+
+// ── Weather ───────────────────────────────────────────────────────────────────
+
+async function fetchWeather(cityObj) {
+  const { timezone, lat, lon } = cityObj;
+  if (lat == null || lon == null) return null;
+
+  const cached = weatherCache.get(timezone);
+  if (cached && Date.now() - cached.fetchedAt < WEATHER_TTL) return cached.data;
+
+  try {
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}` +
+                `&current=temperature_2m,weather_code&timezone=auto`;
+    const res = await fetch(url);
+    if (!res.ok) throw new Error('fetch failed');
+    const json = await res.json();
+    const data = {
+      temp: Math.round(json.current.temperature_2m),
+      code: json.current.weather_code,
+    };
+    weatherCache.set(timezone, { data, fetchedAt: Date.now() });
+    return data;
+  } catch {
+    return null;
+  }
+}
+
+function weatherHTML(data) {
+  if (!data) return '<span class="weather-unavailable">Weather unavailable</span>';
+  const info = WMO_CODES[data.code] ?? { emoji: '🌡️', label: '' };
+  return `<span class="weather-emoji">${info.emoji}</span>` +
+         `<span class="weather-temp">${data.temp}°C</span>` +
+         `<span class="weather-label">${info.label}</span>`;
+}
+
+async function loadWeatherForCard(card, cityObj) {
+  const el = card.querySelector('.weather-display');
+  if (!el) return;
+  const data = await fetchWeather(cityObj);
+  el.innerHTML = weatherHTML(data);
+}
+
+// ── State ─────────────────────────────────────────────────────────────────────
 
 function loadState() {
   try {
     const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) return JSON.parse(saved);
+    if (saved) {
+      // Re-merge with MAJOR_CITIES to pick up lat/lon fields
+      return JSON.parse(saved)
+        .map(s => MAJOR_CITIES.find(c => c.timezone === s.timezone) ?? s)
+        .filter(Boolean);
+    }
   } catch {}
   return DEFAULT_CITIES.map(name => MAJOR_CITIES.find(c => c.city === name)).filter(Boolean);
 }
@@ -58,6 +136,8 @@ function loadState() {
 function saveState() {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(activeTimezones));
 }
+
+// ── Time formatting ───────────────────────────────────────────────────────────
 
 function getOffsetLabel(timezone) {
   try {
@@ -104,6 +184,8 @@ function formatDate(timezone) {
   }).format(now);
 }
 
+// ── Card ──────────────────────────────────────────────────────────────────────
+
 function createClockCard(cityObj) {
   const card = document.createElement('div');
   card.className = 'clock-card';
@@ -129,9 +211,14 @@ function createClockCard(cityObj) {
   const dateDisplay = document.createElement('div');
   dateDisplay.className = 'date-display';
 
-  card.append(removeBtn, cityName, tzLabel, timeDisplay, dateDisplay);
+  const weatherDisplay = document.createElement('div');
+  weatherDisplay.className = 'weather-display';
+  weatherDisplay.innerHTML = '<span class="weather-loading">Loading weather…</span>';
+
+  card.append(removeBtn, cityName, tzLabel, timeDisplay, dateDisplay, weatherDisplay);
 
   updateCard(card, cityObj.timezone);
+  loadWeatherForCard(card, cityObj);
   return card;
 }
 
@@ -142,6 +229,8 @@ function updateCard(card, timezone) {
     `${hours}:${minutes}<span class="seconds">:${seconds}</span><span class="ampm">${ampm}</span>`;
   card.querySelector('.date-display').textContent = formatDate(timezone);
 }
+
+// ── Grid ──────────────────────────────────────────────────────────────────────
 
 function renderEmptyState() {
   const grid = document.getElementById('clocks-grid');
@@ -199,6 +288,8 @@ function populateSelect() {
   });
 }
 
+// ── Init ──────────────────────────────────────────────────────────────────────
+
 function init() {
   populateSelect();
 
@@ -215,6 +306,15 @@ function init() {
   });
 
   setInterval(tick, 1000);
+
+  // Refresh weather every 15 minutes
+  setInterval(() => {
+    document.querySelectorAll('.clock-card').forEach(card => {
+      const tz = card.dataset.timezone;
+      const cityObj = activeTimezones.find(c => c.timezone === tz);
+      if (cityObj) loadWeatherForCard(card, cityObj);
+    });
+  }, WEATHER_TTL);
 }
 
 document.addEventListener('DOMContentLoaded', init);
