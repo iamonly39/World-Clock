@@ -1,0 +1,17 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "agent",
+            "prompt": "Check the file that was just modified. The hook input is: $ARGUMENTS\n\nExtract the file_path from tool_input. If the file is one of: app.js, style.css, or index.html — read the current contents of all three source files plus README.md, then rewrite README.md to accurately reflect the current state of the project (features, usage, tech stack). Keep the README concise and factual. If the modified file is NOT one of those three, do nothing.",
+            "statusMessage": "Updating README…",
+            "timeout": 60
+          }
+        ]
+      }
+    ]
+  }
+}
