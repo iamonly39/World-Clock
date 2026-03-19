@@ -129,37 +129,12 @@ body.steampunk #clock-toggle:hover {
 }
 
 /* Steampunk analog clock face */
-body.steampunk .clock-face-bg {
-  fill: #c8a84b;
-  stroke: #8B6914;
-  stroke-width: 5;
-}
-
-body.steampunk .analog-face line {
-  stroke: #3a2a10;
-}
-
-body.steampunk .hour-hand {
-  stroke: #2a1a08;
-  stroke-width: 9;
-}
-
-body.steampunk .minute-hand {
-  stroke: #3a2a10;
-  stroke-width: 5;
-}
-
-body.steampunk .second-hand line {
-  stroke: #8B0000;
-}
-
-body.steampunk .second-hand circle {
-  fill: #8B0000;
-}
-
-body.steampunk .clock-cap {
-  fill: #AA8C2C;
-  stroke: #8B6914;
-  stroke-width: 2;
-  r: 7;
-}
+body.steampunk .analog-face > circle:first-child { fill: #5a3e1a; }
+body.steampunk .clock-face-bg  { fill: #e8d89a; }
+body.steampunk .analog-face line:not(.hour-hand):not(.minute-hand):not(.second-hand) { stroke: #3a2508; }
+body.steampunk .analog-face circle:not(.clock-face-bg):not(.clock-cap) { fill: #3a2508; }
+body.steampunk .analog-face text { fill: #2a1a05; }
+body.steampunk .hour-hand   { stroke: #1e1305; stroke-width: 6; }
+body.steampunk .minute-hand { stroke: #3a2508; stroke-width: 4; }
+body.steampunk .second-hand { stroke: #8B0000; }
+body.steampunk .clock-cap   { fill: #AA8C2C; }
