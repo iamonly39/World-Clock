@@ -118,6 +118,106 @@ main {
   background: var(--accent-dim);
 }
 
+/* Second toggle button */
+#clock-toggle {
+  position: absolute;
+  top: 0;
+  right: calc(6rem + 0.5rem); /* sits left of #theme-toggle */
+  background: var(--surface);
+  color: var(--text-muted);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 0.45rem 0.9rem;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: color 0.2s, border-color 0.2s;
+}
+
+#clock-toggle:hover {
+  color: var(--text);
+  border-color: var(--accent);
+}
+
+/* ── Analog clock ── */
+.analog-clock {
+  display: none; /* hidden by default; shown in analog mode */
+  width: 100%;
+  aspect-ratio: 1;
+  margin: 0.75rem 0;
+}
+
+.analog-face {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: radial-gradient(circle at 35% 30%, #2a2e45, var(--surface));
+  border: 3px solid var(--border);
+  box-shadow: inset 0 0 12px rgba(0,0,0,0.5), 0 4px 12px rgba(0,0,0,0.4);
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* Hour tick marks via repeating pseudo-element trick */
+.analog-face::before {
+  content: '';
+  position: absolute;
+  inset: 6%;
+  border-radius: 50%;
+  border: 2px dashed rgba(255,255,255,0.08);
+}
+
+.hand {
+  position: absolute;
+  bottom: 50%;
+  left: 50%;
+  transform-origin: bottom center;
+  border-radius: 4px;
+}
+
+.hour-hand {
+  width: 5px;
+  height: 26%;
+  margin-left: -2.5px;
+  background: var(--text);
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+.minute-hand {
+  width: 3px;
+  height: 36%;
+  margin-left: -1.5px;
+  background: var(--accent);
+  box-shadow: 0 0 4px rgba(0,0,0,0.5);
+}
+
+.second-hand {
+  width: 2px;
+  height: 40%;
+  margin-left: -1px;
+  background: #e05c5c;
+}
+
+.clock-center {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--accent);
+  z-index: 10;
+}
+
+/* Toggle state: analog mode */
+.show-analog .analog-clock {
+  display: block;
+}
+
+.show-analog .time-display,
+.show-analog .date-display {
+  display: none;
+}
+
 /* Clocks grid */
 #clocks-grid {
   display: grid;

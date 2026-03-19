@@ -76,6 +76,7 @@ const WEATHER_TTL = 15 * 60 * 1000; // 15 minutes
 
 let activeTimezones = [];
 const weatherCache = new Map(); // timezone → { data, fetchedAt }
+let showAnalog = false;
 
 // ── Weather ───────────────────────────────────────────────────────────────────
 
@@ -205,6 +206,17 @@ function createClockCard(cityObj) {
   tzLabel.className = 'tz-label';
   tzLabel.textContent = getOffsetLabel(cityObj.timezone);
 
+  const analogClock = document.createElement('div');
+  analogClock.className = 'analog-clock';
+  analogClock.innerHTML = `
+    <div class="analog-face">
+      <div class="hand hour-hand"></div>
+      <div class="hand minute-hand"></div>
+      <div class="hand second-hand"></div>
+      <div class="clock-center"></div>
+    </div>
+  `;
+
   const timeDisplay = document.createElement('div');
   timeDisplay.className = 'time-display';
 
@@ -215,7 +227,7 @@ function createClockCard(cityObj) {
   weatherDisplay.className = 'weather-display';
   weatherDisplay.innerHTML = '<span class="weather-loading">Loading weather…</span>';
 
-  card.append(removeBtn, cityName, tzLabel, timeDisplay, dateDisplay, weatherDisplay);
+  card.append(removeBtn, cityName, tzLabel, analogClock, timeDisplay, dateDisplay, weatherDisplay);
 
   updateCard(card, cityObj.timezone);
   loadWeatherForCard(card, cityObj);
@@ -224,10 +236,25 @@ function createClockCard(cityObj) {
 
 function updateCard(card, timezone) {
   const { hours, minutes, seconds, ampm } = formatTime(timezone);
+
+  // Digital
   const timeDisplay = card.querySelector('.time-display');
   timeDisplay.innerHTML =
     `${hours}:${minutes}<span class="seconds">:${seconds}</span><span class="ampm">${ampm}</span>`;
   card.querySelector('.date-display').textContent = formatDate(timezone);
+
+  // Analog hands
+  const now = new Date();
+  const local = new Date(now.toLocaleString('en-US', { timeZone: timezone }));
+  const h = local.getHours() % 12;
+  const m = local.getMinutes();
+  const s = local.getSeconds();
+  const hourDeg   = h * 30 + m * 0.5;
+  const minuteDeg = m * 6 + s * 0.1;
+  const secondDeg = s * 6;
+  card.querySelector('.hour-hand').style.transform   = `rotate(${hourDeg}deg)`;
+  card.querySelector('.minute-hand').style.transform = `rotate(${minuteDeg}deg)`;
+  card.querySelector('.second-hand').style.transform = `rotate(${secondDeg}deg)`;
 }
 
 // ── Grid ──────────────────────────────────────────────────────────────────────
@@ -317,6 +344,26 @@ function init() {
   }, WEATHER_TTL);
 }
 
+// ── Analog / Digital toggle ───────────────────────────────────────────────────
+
+const CLOCK_MODE_KEY = 'world-clock-mode';
+
+function initClockToggle() {
+  const btn = document.getElementById('clock-toggle');
+  if (localStorage.getItem(CLOCK_MODE_KEY) === 'analog') setClockMode(true);
+
+  btn.addEventListener('click', () => {
+    setClockMode(!showAnalog);
+    localStorage.setItem(CLOCK_MODE_KEY, showAnalog ? 'analog' : 'digital');
+  });
+}
+
+function setClockMode(analog) {
+  showAnalog = analog;
+  document.body.classList.toggle('show-analog', analog);
+  document.getElementById('clock-toggle').textContent = analog ? '🔢 Digital' : '🕐 Analog';
+}
+
 // ── Theme toggle ──────────────────────────────────────────────────────────────
 
 const THEME_KEY = 'world-clock-theme';
@@ -344,4 +391,4 @@ function applyTheme(theme) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => { init(); initTheme(); });
+document.addEventListener('DOMContentLoaded', () => { init(); initTheme(); initClockToggle(); });
