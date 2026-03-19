@@ -185,6 +185,39 @@ function formatDate(timezone) {
   }).format(now);
 }
 
+// ── Analog clock face (SVG) ───────────────────────────────────────────────────
+
+function buildAnalogFace() {
+  const ticks = [];
+  for (let i = 0; i < 60; i++) {
+    const deg = i * 6;
+    const rad = (deg - 90) * Math.PI / 180;
+    const isMainHour = i % 15 === 0;
+    const isHour     = i % 5 === 0;
+    const outer = 91;
+    const inner = isMainHour ? 70 : isHour ? 76 : 87;
+    const w     = isMainHour ? 7  : isHour ? 4.5 : 1.5;
+    const col   = isHour ? '#111' : '#666';
+    const cap   = isHour ? 'square' : 'round';
+    const x1 = (100 + inner * Math.cos(rad)).toFixed(2);
+    const y1 = (100 + inner * Math.sin(rad)).toFixed(2);
+    const x2 = (100 + outer * Math.cos(rad)).toFixed(2);
+    const y2 = (100 + outer * Math.sin(rad)).toFixed(2);
+    ticks.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}" stroke-linecap="${cap}"/>`);
+  }
+  return `<svg class="analog-face" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <circle class="clock-face-bg" cx="100" cy="100" r="97" fill="#f2f0e8" stroke="#111" stroke-width="4"/>
+  ${ticks.join('\n  ')}
+  <line class="hour-hand" x1="100" y1="110" x2="100" y2="46" stroke="#111" stroke-width="8" stroke-linecap="round"/>
+  <line class="minute-hand" x1="100" y1="110" x2="100" y2="16" stroke="#111" stroke-width="4.5" stroke-linecap="round"/>
+  <g class="second-hand">
+    <line x1="100" y1="124" x2="100" y2="15" stroke="#d42b2b" stroke-width="2" stroke-linecap="round"/>
+    <circle cx="100" cy="118" r="6" fill="#d42b2b"/>
+  </g>
+  <circle class="clock-cap" cx="100" cy="100" r="5.5" fill="#111"/>
+</svg>`;
+}
+
 // ── Card ──────────────────────────────────────────────────────────────────────
 
 function createClockCard(cityObj) {
@@ -208,14 +241,7 @@ function createClockCard(cityObj) {
 
   const analogClock = document.createElement('div');
   analogClock.className = 'analog-clock';
-  analogClock.innerHTML = `
-    <div class="analog-face">
-      <div class="hand hour-hand"></div>
-      <div class="hand minute-hand"></div>
-      <div class="hand second-hand"></div>
-      <div class="clock-center"></div>
-    </div>
-  `;
+  analogClock.innerHTML = buildAnalogFace();
 
   const timeDisplay = document.createElement('div');
   timeDisplay.className = 'time-display';
@@ -258,9 +284,12 @@ function updateCard(card, timezone) {
   const hourDeg   = h * 30 + m * 0.5;
   const minuteDeg = m * 6 + s * 0.1;
   const secondDeg = s * 6;
-  card.querySelector('.hour-hand').style.transform   = `rotate(${hourDeg}deg)`;
-  card.querySelector('.minute-hand').style.transform = `rotate(${minuteDeg}deg)`;
-  card.querySelector('.second-hand').style.transform = `rotate(${secondDeg}deg)`;
+  const face = card.querySelector('.analog-face');
+  if (face) {
+    face.querySelector('.hour-hand').setAttribute('transform', `rotate(${hourDeg}, 100, 100)`);
+    face.querySelector('.minute-hand').setAttribute('transform', `rotate(${minuteDeg}, 100, 100)`);
+    face.querySelector('.second-hand').setAttribute('transform', `rotate(${secondDeg}, 100, 100)`);
+  }
 }
 
 // ── Grid ──────────────────────────────────────────────────────────────────────
