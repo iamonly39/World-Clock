@@ -9,6 +9,7 @@ A clean, dark-themed world clock app that lets you track time and live weather a
 - **Real-time updates** — clocks tick every second; weather refreshes every 15 minutes
 - **Persistent state** — your selected cities are saved in `localStorage` and restored on reload
 - **Responsive grid** — tiles reflow cleanly across screen sizes
+- **Steampunk theme** — click the **⚙️ Steampunk** button in the header to switch to a brass-and-copper aesthetic; click **🔵 Default** to switch back. Theme preference is saved in `localStorage`
 
 ## Usage
 
