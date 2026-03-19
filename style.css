@@ -208,15 +208,6 @@ main {
   z-index: 10;
 }
 
-/* Toggle state: analog mode */
-.show-analog .analog-clock {
-  display: block;
-}
-
-.show-analog .time-display,
-.show-analog .date-display {
-  display: none;
-}
 
 /* Clocks grid */
 #clocks-grid {
