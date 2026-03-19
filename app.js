@@ -231,6 +231,12 @@ function createClockCard(cityObj) {
 
   updateCard(card, cityObj.timezone);
   loadWeatherForCard(card, cityObj);
+  // Apply current display mode
+  if (showAnalog) {
+    analogClock.style.display = 'block';
+    timeDisplay.style.display = 'none';
+    dateDisplay.style.display = 'none';
+  }
   return card;
 }
 
@@ -360,8 +366,12 @@ function initClockToggle() {
 
 function setClockMode(analog) {
   showAnalog = analog;
-  document.body.classList.toggle('show-analog', analog);
   document.getElementById('clock-toggle').textContent = analog ? '🔢 Digital' : '🕐 Analog';
+  document.querySelectorAll('.clock-card').forEach(card => {
+    card.querySelector('.analog-clock').style.display  = analog ? 'block' : 'none';
+    card.querySelector('.time-display').style.display  = analog ? 'none'  : '';
+    card.querySelector('.date-display').style.display  = analog ? 'none'  : '';
+  });
 }
 
 // ── Theme toggle ──────────────────────────────────────────────────────────────
