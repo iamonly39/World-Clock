@@ -187,34 +187,50 @@ function formatDate(timezone) {
 
 // ── Analog clock face (SVG) ───────────────────────────────────────────────────
 
-function buildAnalogFace() {
-  const ticks = [];
+function buildAnalogFace(cityName) {
+  const marks = [];
+
+  // 60 tick marks: dots for minutes, dashes for hours
   for (let i = 0; i < 60; i++) {
-    const deg = i * 6;
-    const rad = (deg - 90) * Math.PI / 180;
+    const rad = (i * 6 - 90) * Math.PI / 180;
     const isMainHour = i % 15 === 0;
     const isHour     = i % 5 === 0;
-    const outer = 91;
-    const inner = isMainHour ? 70 : isHour ? 76 : 87;
-    const w     = isMainHour ? 7  : isHour ? 4.5 : 1.5;
-    const col   = isHour ? '#111' : '#666';
-    const cap   = isHour ? 'square' : 'round';
-    const x1 = (100 + inner * Math.cos(rad)).toFixed(2);
-    const y1 = (100 + inner * Math.sin(rad)).toFixed(2);
-    const x2 = (100 + outer * Math.cos(rad)).toFixed(2);
-    const y2 = (100 + outer * Math.sin(rad)).toFixed(2);
-    ticks.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="${col}" stroke-width="${w}" stroke-linecap="${cap}"/>`);
+    if (isHour) {
+      const outer = 82, inner = isMainHour ? 72 : 76;
+      const w = isMainHour ? 3.5 : 2.5;
+      const x1 = (100 + inner * Math.cos(rad)).toFixed(2);
+      const y1 = (100 + inner * Math.sin(rad)).toFixed(2);
+      const x2 = (100 + outer * Math.cos(rad)).toFixed(2);
+      const y2 = (100 + outer * Math.sin(rad)).toFixed(2);
+      marks.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#111" stroke-width="${w}" stroke-linecap="square"/>`);
+    } else {
+      const r = 79;
+      const cx = (100 + r * Math.cos(rad)).toFixed(2);
+      const cy = (100 + r * Math.sin(rad)).toFixed(2);
+      marks.push(`<circle cx="${cx}" cy="${cy}" r="1.4" fill="#444"/>`);
+    }
   }
+
+  // Numbers 1–12
+  const numR = 63;
+  for (let n = 1; n <= 12; n++) {
+    const rad = (n * 30 - 90) * Math.PI / 180;
+    const x = (100 + numR * Math.cos(rad)).toFixed(2);
+    const y = (100 + numR * Math.sin(rad)).toFixed(2);
+    marks.push(`<text x="${x}" y="${y}" text-anchor="middle" dominant-baseline="central" font-family="'Helvetica Neue',Arial,sans-serif" font-size="12" fill="#111">${n}</text>`);
+  }
+
+  const label = (cityName || '').toUpperCase();
+
   return `<svg class="analog-face" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
-  <circle class="clock-face-bg" cx="100" cy="100" r="97" fill="#f2f0e8" stroke="#111" stroke-width="4"/>
-  ${ticks.join('\n  ')}
-  <line class="hour-hand" x1="100" y1="110" x2="100" y2="46" stroke="#111" stroke-width="8" stroke-linecap="round"/>
-  <line class="minute-hand" x1="100" y1="110" x2="100" y2="16" stroke="#111" stroke-width="4.5" stroke-linecap="round"/>
-  <g class="second-hand">
-    <line x1="100" y1="124" x2="100" y2="15" stroke="#d42b2b" stroke-width="2" stroke-linecap="round"/>
-    <circle cx="100" cy="118" r="6" fill="#d42b2b"/>
-  </g>
-  <circle class="clock-cap" cx="100" cy="100" r="5.5" fill="#111"/>
+  <circle cx="100" cy="100" r="99" fill="#1c1c1c"/>
+  <circle class="clock-face-bg" cx="100" cy="100" r="84" fill="#ffffff"/>
+  ${marks.join('\n  ')}
+  <text class="clock-city-label" x="100" y="126" text-anchor="middle" dominant-baseline="central" font-family="'Helvetica Neue',Arial,sans-serif" font-size="9.5" font-weight="500" letter-spacing="2" fill="#111">${label}</text>
+  <line class="hour-hand"   x1="100" y1="100" x2="100" y2="50"  stroke="#111" stroke-width="5.5" stroke-linecap="round"/>
+  <line class="minute-hand" x1="100" y1="100" x2="100" y2="24"  stroke="#111" stroke-width="3.5" stroke-linecap="round"/>
+  <line class="second-hand" x1="100" y1="115" x2="100" y2="22"  stroke="#333" stroke-width="1.5" stroke-linecap="round"/>
+  <circle class="clock-cap" cx="100" cy="100" r="3.5" fill="#b8860b"/>
 </svg>`;
 }
 
@@ -241,7 +257,7 @@ function createClockCard(cityObj) {
 
   const analogClock = document.createElement('div');
   analogClock.className = 'analog-clock';
-  analogClock.innerHTML = buildAnalogFace();
+  analogClock.innerHTML = buildAnalogFace(cityObj.city);
 
   const timeDisplay = document.createElement('div');
   timeDisplay.className = 'time-display';
