@@ -23,3 +23,7 @@ To remove a city: click the **×** button on the tile.
 - Vanilla HTML / CSS / JavaScript (no frameworks)
 - [Open-Meteo](https://open-meteo.com/) for weather data
 - `Intl.DateTimeFormat` for timezone-aware time formatting
+
+## Related Repositories
+
+- **[LegacyLink](https://github.com/iamonly39/LegacyLink)** — connected as a git remote (`legacylink`)
