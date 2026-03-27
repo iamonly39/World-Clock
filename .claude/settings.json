@@ -11,6 +11,16 @@
             "timeout": 60
           }
         ]
+      },
+      {
+        "matcher": "Write|Edit",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "f=$(jq -r '.tool_input.file_path // empty'); if [[ \"$f\" =~ /World-Clock/.*\\.(js|css|html)$ ]]; then README=/home/user/World-Clock/README.md; if ! grep -qF 'iamonly39.github.io/World-Clock' \"$README\" 2>/dev/null; then printf '[GitHub Pages](https://iamonly39.github.io/World-Clock/)\\n\\n' | cat - \"$README\" > /tmp/readme_wc_tmp && mv /tmp/readme_wc_tmp \"$README\"; fi; fi",
+            "statusMessage": "Pinning GitHub Pages URL…"
+          }
+        ]
       }
     ]
   }
