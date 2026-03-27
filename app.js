@@ -446,4 +446,248 @@ function applyTheme(theme) {
   }
 }
 
-document.addEventListener('DOMContentLoaded', () => { init(); initTheme(); initClockToggle(); });
+// ── Meeting Planner ───────────────────────────────────────────────────────────
+
+const MEETING_KEY = 'world-clock-meeting';
+
+const meetingState = {
+  duration: 60,
+  attendees: [],
+  open: false
+};
+
+function saveMeetingState() {
+  localStorage.setItem(MEETING_KEY, JSON.stringify({
+    duration: meetingState.duration,
+    attendees: meetingState.attendees.map(a => a.timezone),
+    open: meetingState.open
+  }));
+}
+
+function loadMeetingState() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(MEETING_KEY) || '{}');
+    if (saved.duration) meetingState.duration = saved.duration;
+    if (saved.open)     meetingState.open = saved.open;
+    if (Array.isArray(saved.attendees)) {
+      meetingState.attendees = saved.attendees
+        .map(tz => MAJOR_CITIES.find(c => c.timezone === tz))
+        .filter(Boolean);
+    }
+  } catch {}
+}
+
+function addAttendee(cityObj) {
+  if (meetingState.attendees.some(a => a.timezone === cityObj.timezone)) return;
+  meetingState.attendees.push(cityObj);
+  saveMeetingState();
+  renderAttendees();
+}
+
+function removeAttendee(timezone) {
+  meetingState.attendees = meetingState.attendees.filter(a => a.timezone !== timezone);
+  saveMeetingState();
+  renderAttendees();
+}
+
+function renderAttendees() {
+  const list = document.getElementById('meeting-attendee-list');
+  if (!list) return;
+  list.innerHTML = '';
+  if (meetingState.attendees.length === 0) {
+    list.innerHTML = '<span class="meeting-hint">No attendees added yet.</span>';
+    return;
+  }
+  meetingState.attendees.forEach(a => {
+    const chip = document.createElement('div');
+    chip.className = 'attendee-chip';
+    chip.innerHTML = `
+      <span class="chip-city">${a.city}</span>
+      <span class="chip-offset">${getOffsetLabel(a.timezone)}</span>
+      <button class="chip-remove" title="Remove">&times;</button>
+    `;
+    chip.querySelector('.chip-remove').addEventListener('click', () => removeAttendee(a.timezone));
+    list.appendChild(chip);
+  });
+}
+
+function pickSpaced(slots, count) {
+  const MIN_GAP_MS = 2 * 60 * 60 * 1000;
+  const picks = [];
+  for (const s of slots) {
+    if (picks.length >= count) break;
+    const last = picks[picks.length - 1];
+    if (!last || s.slotDate - last.slotDate >= MIN_GAP_MS) picks.push(s);
+  }
+  return picks;
+}
+
+function findMeetingTimes(attendees, durationMinutes) {
+  const WORK_START  = 8.5;
+  const WORK_END    = 17.0;
+  const durationHrs = durationMinutes / 60;
+
+  if (attendees.length === 0) return { noAttendees: true, perfect: [], partial: [] };
+  if (durationHrs > (WORK_END - WORK_START)) return { impossible: true, perfect: [], partial: [] };
+
+  const base = new Date();
+  base.setUTCHours(0, 0, 0, 0);
+
+  const slots = [];
+  for (let i = 0; i < 48; i++) {
+    const slotDate = new Date(base.getTime() + i * 30 * 60 * 1000);
+    const attendeeResults = attendees.map(a => {
+      const local     = new Date(slotDate.toLocaleString('en-US', { timeZone: a.timezone }));
+      const localHour = local.getHours() + local.getMinutes() / 60;
+      const inWindow  = localHour >= WORK_START && (localHour + durationHrs) <= WORK_END;
+      const timeStr   = local.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
+      const dayOffset = local.getDate() - slotDate.getUTCDate();
+      return { city: a.city, timezone: a.timezone, timeStr, inWindow, dayOffset };
+    });
+    slots.push({ slotDate, attendeeResults, score: attendeeResults.filter(r => r.inWindow).length });
+  }
+
+  const n = attendees.length;
+  const perfect = pickSpaced(slots.filter(s => s.score === n), 3);
+
+  let partial = [];
+  if (perfect.length === 0 && n > 1) {
+    const maxScore = Math.max(...slots.map(s => s.score));
+    if (maxScore > 0) partial = pickSpaced(slots.filter(s => s.score === maxScore), 3);
+  }
+
+  return { noAttendees: false, impossible: false, perfect, partial };
+}
+
+function buildResultCard(slot) {
+  const card = document.createElement('div');
+  card.className = 'meeting-result-card';
+  slot.attendeeResults.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'result-row';
+    let dayTag = '';
+    if (r.dayOffset > 0)      dayTag = ' <span class="day-tag">+1d</span>';
+    else if (r.dayOffset < 0) dayTag = ' <span class="day-tag">-1d</span>';
+    row.innerHTML = `
+      <span class="result-dot ${r.inWindow ? 'green' : 'red'}"></span>
+      <span class="result-city">${r.city}</span>
+      <span class="result-time">${r.timeStr}${dayTag}</span>
+    `;
+    card.appendChild(row);
+  });
+  return card;
+}
+
+function renderMeetingResults(results) {
+  const area = document.getElementById('meeting-results');
+  if (!area) return;
+  area.innerHTML = '';
+
+  if (results.noAttendees) {
+    area.innerHTML = '<p class="meeting-hint">Add at least one attendee to find meeting times.</p>';
+    return;
+  }
+  if (results.impossible) {
+    area.innerHTML = '<p class="meeting-hint meeting-error">Duration exceeds the 8:30 AM – 5:00 PM work window. Choose a shorter meeting.</p>';
+    return;
+  }
+  if (results.perfect.length === 0 && results.partial.length === 0) {
+    area.innerHTML = '<p class="meeting-hint">No suitable times found. Try a shorter duration.</p>';
+    return;
+  }
+
+  if (results.perfect.length > 0) {
+    const h = document.createElement('p');
+    h.className = 'results-heading perfect';
+    h.textContent = '\u2705 Works for everyone';
+    area.appendChild(h);
+    results.perfect.forEach(s => area.appendChild(buildResultCard(s)));
+  }
+
+  if (results.partial.length > 0) {
+    const out = results.partial[0].attendeeResults.filter(r => !r.inWindow).map(r => r.city).join(', ');
+    const h = document.createElement('p');
+    h.className = 'results-heading partial';
+    h.textContent = '\u26a0\ufe0f Best option \u2014 outside window for: ' + out;
+    area.appendChild(h);
+    results.partial.forEach(s => area.appendChild(buildResultCard(s)));
+  }
+}
+
+function buildMeetingPanel() {
+  const panel = document.getElementById('meeting-panel');
+  panel.className = 'meeting-panel' + (meetingState.open ? ' open' : '');
+
+  panel.innerHTML = `
+    <div class="meeting-panel-header">
+      <span class="meeting-title">\ud83d\udcc5 Meeting Planner</span>
+      <button class="meeting-chevron" title="Toggle">${meetingState.open ? '\u25b2' : '\u25bc'}</button>
+    </div>
+    <div class="meeting-panel-body">
+      <div class="meeting-controls">
+        <label class="meeting-label">Duration
+          <select id="meeting-duration">
+            <option value="30">30 min</option>
+            <option value="60">1 hour</option>
+            <option value="90">1.5 hours</option>
+            <option value="120">2 hours</option>
+            <option value="180">3 hours</option>
+          </select>
+        </label>
+        <label class="meeting-label">Add attendee
+          <div class="meeting-add-row">
+            <select id="meeting-tz-select">
+              <option value="">-- Select city --</option>
+            </select>
+            <button id="meeting-add-btn">+ Add</button>
+          </div>
+        </label>
+      </div>
+      <div id="meeting-attendee-list" class="meeting-attendee-list"></div>
+      <button id="meeting-find-btn" class="meeting-find-btn">\ud83d\udd0d Find Meeting Times</button>
+      <div id="meeting-results" class="meeting-results"></div>
+    </div>
+  `;
+
+  const sel = panel.querySelector('#meeting-tz-select');
+  MAJOR_CITIES.forEach(({ city, timezone }) => {
+    const opt = document.createElement('option');
+    opt.value = timezone;
+    opt.textContent = city;
+    sel.appendChild(opt);
+  });
+
+  panel.querySelector('#meeting-duration').value = meetingState.duration;
+
+  panel.querySelector('.meeting-chevron').addEventListener('click', () => {
+    meetingState.open = !meetingState.open;
+    panel.classList.toggle('open', meetingState.open);
+    panel.querySelector('.meeting-chevron').textContent = meetingState.open ? '\u25b2' : '\u25bc';
+    saveMeetingState();
+  });
+
+  panel.querySelector('#meeting-duration').addEventListener('change', e => {
+    meetingState.duration = parseInt(e.target.value, 10);
+    saveMeetingState();
+  });
+
+  panel.querySelector('#meeting-add-btn').addEventListener('click', () => {
+    const tz = panel.querySelector('#meeting-tz-select').value;
+    if (!tz) return;
+    const cityObj = MAJOR_CITIES.find(c => c.timezone === tz);
+    if (cityObj) addAttendee(cityObj);
+    panel.querySelector('#meeting-tz-select').value = '';
+  });
+
+  panel.querySelector('#meeting-find-btn').addEventListener('click', () => {
+    renderMeetingResults(findMeetingTimes(meetingState.attendees, meetingState.duration));
+  });
+}
+
+function initMeetingPanel() {
+  loadMeetingState();
+  buildMeetingPanel();
+  renderAttendees();
+}
+
+document.addEventListener('DOMContentLoaded', () => { init(); initTheme(); initClockToggle(); initMeetingPanel(); });
