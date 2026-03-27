@@ -453,14 +453,18 @@ const MEETING_KEY = 'world-clock-meeting';
 const meetingState = {
   duration: 60,
   attendees: [],
-  open: false
+  open: false,
+  split: false,
+  splitGroups: 2
 };
 
 function saveMeetingState() {
   localStorage.setItem(MEETING_KEY, JSON.stringify({
     duration: meetingState.duration,
     attendees: meetingState.attendees.map(a => a.timezone),
-    open: meetingState.open
+    open: meetingState.open,
+    split: meetingState.split,
+    splitGroups: meetingState.splitGroups
   }));
 }
 
@@ -468,7 +472,9 @@ function loadMeetingState() {
   try {
     const saved = JSON.parse(localStorage.getItem(MEETING_KEY) || '{}');
     if (saved.duration) meetingState.duration = saved.duration;
-    if (saved.open)     meetingState.open = saved.open;
+    if (saved.open)        meetingState.open = saved.open;
+    if (saved.split)       meetingState.split = saved.split;
+    if (saved.splitGroups) meetingState.splitGroups = saved.splitGroups;
     if (Array.isArray(saved.attendees)) {
       meetingState.attendees = saved.attendees
         .map(tz => MAJOR_CITIES.find(c => c.timezone === tz))
@@ -559,6 +565,89 @@ function findMeetingTimes(attendees, durationMinutes) {
   return { noAttendees: false, impossible: false, perfect, partial };
 }
 
+function findSplitMeetingTimes(attendees, durationMinutes, numGroups) {
+  const n = attendees.length;
+  if (n < numGroups) return null;
+
+  const WORK_START = 8.5, WORK_END = 17.0;
+  const durationHrs = durationMinutes / 60;
+  const base = new Date();
+  base.setUTCHours(0, 0, 0, 0);
+  const slotDates = Array.from({ length: 48 }, (_, i) =>
+    new Date(base.getTime() + i * 30 * 60 * 1000));
+
+  // avail[a][i] = true if attendee a fits in slot i
+  const avail = attendees.map(a => slotDates.map(sd => {
+    const local = new Date(sd.toLocaleString('en-US', { timeZone: a.timezone }));
+    const h = local.getHours() + local.getMinutes() / 60;
+    return h >= WORK_START && (h + durationHrs) <= WORK_END;
+  }));
+
+  function groupHasSlot(indices) {
+    return slotDates.some((_, i) => indices.every(a => avail[a][i]));
+  }
+
+  function bestSlotForGroup(indices) {
+    for (let i = 0; i < 48; i++) {
+      if (!indices.every(a => avail[a][i])) continue;
+      const sd = slotDates[i];
+      return {
+        slotDate: sd,
+        attendeeResults: indices.map(a => {
+          const att = attendees[a];
+          const local = new Date(sd.toLocaleString('en-US', { timeZone: att.timezone }));
+          return {
+            city: att.city, timezone: att.timezone, inWindow: true,
+            timeStr: local.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }),
+            dayOffset: local.getDate() - sd.getUTCDate()
+          };
+        }),
+        score: indices.length
+      };
+    }
+    return null;
+  }
+
+  if (numGroups === 2) {
+    for (let mask = 1; mask < (1 << (n - 1)); mask++) {
+      const g1 = [], g2 = [];
+      for (let i = 0; i < n; i++) (mask & (1 << i) ? g1 : g2).push(i);
+      if (!g1.length || !g2.length) continue;
+      if (groupHasSlot(g1) && groupHasSlot(g2)) {
+        return [
+          { members: g1.map(i => attendees[i]), slot: bestSlotForGroup(g1) },
+          { members: g2.map(i => attendees[i]), slot: bestSlotForGroup(g2) }
+        ];
+      }
+    }
+    return null;
+  }
+
+  if (numGroups === 3) {
+    for (let m1 = 1; m1 < (1 << n); m1++) {
+      const g1 = [], rem = [];
+      for (let i = 0; i < n; i++) (m1 & (1 << i) ? g1 : rem).push(i);
+      if (!g1.length || rem.length < 2) continue;
+      if (!groupHasSlot(g1)) continue;
+      for (let m2 = 1; m2 < (1 << rem.length) - 1; m2++) {
+        const g2 = [], g3 = [];
+        for (let j = 0; j < rem.length; j++) (m2 & (1 << j) ? g2 : g3).push(rem[j]);
+        if (!g2.length || !g3.length) continue;
+        if (groupHasSlot(g2) && groupHasSlot(g3)) {
+          return [
+            { members: g1.map(i => attendees[i]), slot: bestSlotForGroup(g1) },
+            { members: g2.map(i => attendees[i]), slot: bestSlotForGroup(g2) },
+            { members: g3.map(i => attendees[i]), slot: bestSlotForGroup(g3) }
+          ];
+        }
+      }
+    }
+    return null;
+  }
+
+  return null;
+}
+
 function buildResultCard(slot) {
   const card = document.createElement('div');
   card.className = 'meeting-result-card';
@@ -614,6 +703,35 @@ function renderMeetingResults(results) {
   }
 }
 
+function renderSplitResults(groups, numGroups) {
+  const area = document.getElementById('meeting-results');
+  if (!area) return;
+  area.innerHTML = '';
+
+  if (!groups) {
+    area.innerHTML = `<p class="meeting-hint meeting-error">No valid ${numGroups}-group split found. Try fewer groups or a shorter duration.</p>`;
+    return;
+  }
+
+  const h = document.createElement('p');
+  h.className = 'results-heading perfect';
+  h.textContent = `\u2705 Suggested split into ${groups.length} meetings`;
+  area.appendChild(h);
+
+  groups.forEach((g, idx) => {
+    const section = document.createElement('div');
+    section.className = 'split-group';
+
+    const label = document.createElement('p');
+    label.className = 'split-group-label';
+    label.textContent = `Group ${idx + 1}: ${g.members.map(m => m.city).join(', ')}`;
+    section.appendChild(label);
+
+    if (g.slot) section.appendChild(buildResultCard(g.slot));
+    area.appendChild(section);
+  });
+}
+
 function buildMeetingPanel() {
   const panel = document.getElementById('meeting-panel');
   panel.className = 'meeting-panel' + (meetingState.open ? ' open' : '');
@@ -644,6 +762,16 @@ function buildMeetingPanel() {
         </label>
       </div>
       <div id="meeting-attendee-list" class="meeting-attendee-list"></div>
+      <div class="split-controls">
+        <label class="split-toggle-label">
+          <input type="checkbox" id="meeting-split" ${meetingState.split ? 'checked' : ''}>
+          Split into groups
+        </label>
+        <select id="meeting-split-groups" class="${meetingState.split ? '' : 'hidden'}">
+          <option value="2" ${meetingState.splitGroups === 2 ? 'selected' : ''}>2 groups</option>
+          <option value="3" ${meetingState.splitGroups === 3 ? 'selected' : ''}>3 groups</option>
+        </select>
+      </div>
       <button id="meeting-find-btn" class="meeting-find-btn">\ud83d\udd0d Find Meeting Times</button>
       <div id="meeting-results" class="meeting-results"></div>
     </div>
@@ -679,8 +807,24 @@ function buildMeetingPanel() {
     panel.querySelector('#meeting-tz-select').value = '';
   });
 
+  panel.querySelector('#meeting-split').addEventListener('change', e => {
+    meetingState.split = e.target.checked;
+    panel.querySelector('#meeting-split-groups').classList.toggle('hidden', !meetingState.split);
+    saveMeetingState();
+  });
+
+  panel.querySelector('#meeting-split-groups').addEventListener('change', e => {
+    meetingState.splitGroups = parseInt(e.target.value, 10);
+    saveMeetingState();
+  });
+
   panel.querySelector('#meeting-find-btn').addEventListener('click', () => {
-    renderMeetingResults(findMeetingTimes(meetingState.attendees, meetingState.duration));
+    if (meetingState.split) {
+      const groups = findSplitMeetingTimes(meetingState.attendees, meetingState.duration, meetingState.splitGroups);
+      renderSplitResults(groups, meetingState.splitGroups);
+    } else {
+      renderMeetingResults(findMeetingTimes(meetingState.attendees, meetingState.duration));
+    }
   });
 }
 
